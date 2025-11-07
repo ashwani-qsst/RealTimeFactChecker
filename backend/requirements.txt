@@ -1,0 +1,32 @@
+# ============================
+# Backend Core (FastAPI stack)
+# ============================
+
+fastapi==0.115.0             # Modern async web framework for APIs and WebSockets
+uvicorn==0.30.6              # ASGI server to run FastAPI apps (supports async & real-time)
+
+# ============================
+# Configuration & Validation
+# ============================
+
+python-dotenv==1.0.1         # Load environment variables from a .env file
+pydantic==2.9.2              # Data validation and settings management (used by FastAPI)
+
+# ============================
+# Database & ORM
+# ============================
+
+sqlalchemy==2.0.34           # ORM and query builder for PostgreSQL and others
+psycopg2-binary==2.9.9       # PostgreSQL database adapter for SQLAlchemy
+
+# ============================
+# Cache / Message Queue
+# ============================
+
+redis==5.1.1                 # In-memory data store for caching, pub/sub, and sessions
+
+# ============================
+# Cloud Storage / AWS
+# ============================
+
+boto3==1.35.44               # AWS SDK for Python (used to upload/download to S3)
