@@ -1,0 +1,259 @@
+.audio-streamer-container {
+  min-height: 100vh;
+  padding: 2rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.audio-streamer-card {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  border-radius: 1.5rem;
+  padding: 2.5rem;
+  max-width: 42rem;
+  width: 100%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.header-icon {
+  color: #c084fc;
+  margin-bottom: 1rem;
+}
+
+.header h1 {
+  color: white;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.header p {
+  color: #c084fc;
+  font-size: 1rem;
+}
+
+.connection-panel {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.status-indicator {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.status-label {
+  color: white;
+  font-weight: 500;
+}
+
+.status-value {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: white;
+}
+
+.status-dot {
+  width: 0.75rem;
+  height: 0.75rem;
+  border-radius: 50%;
+}
+
+.status-dot.connected {
+  background: #4ade80;
+  animation: pulse 2s infinite;
+}
+
+.status-dot.disconnected {
+  background: #f87171;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+.input-group {
+  margin-bottom: 1.5rem;
+}
+
+.input-group label {
+  display: block;
+  color: white;
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.5rem;
+  color: white;
+  font-size: 1rem;
+}
+
+.input-group input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 3px rgba(167, 139, 250, 0.1);
+}
+
+.button-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.btn {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: all 0.2s;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-success {
+  background: #22c55e;
+  color: white;
+}
+
+.btn-success:hover:not(:disabled) {
+  background: #16a34a;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #dc2626;
+}
+
+.btn-primary {
+  background: #a78bfa;
+  color: white;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #8b5cf6;
+}
+
+.btn-warning {
+  background: #f97316;
+  color: white;
+}
+
+.btn-warning:hover:not(:disabled) {
+  background: #ea580c;
+}
+
+.btn-large {
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+}
+
+.playback-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  border-radius: 0.5rem;
+  color: #c084fc;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: 0.5rem;
+  color: #fca5a5;
+  margin-bottom: 1.5rem;
+  font-size: 0.9rem;
+}
+
+.audio-visualizer {
+  margin-bottom: 1.5rem;
+}
+
+.visualizer-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+  color: white;
+  font-weight: 500;
+}
+
+.level-value {
+  color: #c084fc;
+}
+
+.visualizer-bar {
+  width: 100%;
+  height: 1rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.visualizer-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #4ade80 0%, #a78bfa 100%);
+  transition: width 0.1s ease;
+}
+
+.recording-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.info-box {
+  padding: 1rem;
+  background: rgba(59, 130, 246, 0.2);
+  border: 1px solid rgba(59, 130, 246, 0.3);
+  border-radius: 0.5rem;
+  color: #93c5fd;
+  font-size: 0.9rem;
+}
+
+.info-box strong {
+  color: white;
+}

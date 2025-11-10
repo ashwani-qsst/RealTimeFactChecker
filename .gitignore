@@ -1,1 +1,3 @@
 venv
+websocket-audio-streaming/node_modules
+backend/.env

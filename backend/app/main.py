@@ -1,7 +1,14 @@
-from fastapi import FastAPI, WebSocket
-from fastapi.middleware.cors import CORSMiddleware
+import os
+# must be before anything else
+from dotenv import load_dotenv
+load_dotenv()
 
-app = FastAPI()
+
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from app.api import routes_audio
+
+app = FastAPI(title="Debate Analyzer (Whisper + Pyannote)")
 
 app.add_middleware(
     CORSMiddleware,
@@ -11,6 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(routes_audio.router)
+
 @app.get("/")
 async def root():
-    return {"message": "Real-Time Debate Fact Checker API running"}
+    return {"message": "Whisper + Pyannote backend running!"}
