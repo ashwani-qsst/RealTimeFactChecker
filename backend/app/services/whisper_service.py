@@ -2,7 +2,7 @@ import torch
 from faster_whisper import WhisperModel
 
 # Load Whisper model (small is best balance for real-time)
-model = WhisperModel("small", device="cuda" if torch.cuda.is_available() else "cpu")
+model = WhisperModel("tiny.en", device="cuda" if torch.cuda.is_available() else "cpu")
 
 def transcribe_audio(file_path: str):
     """
