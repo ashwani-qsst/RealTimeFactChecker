@@ -1,9 +1,8 @@
 export const DEFAULT_WS_URL = 'ws://localhost:8000/ws/audio';
 
 export const RECORDING_CONFIG = {
-  mimeType: 'audio/webm;codecs=opus',
-  audioBitsPerSecond: 128000,
-  timeslice: 1000
+ mimeType: 'audio/webm;codecs=opus', // ✅ full WebM header each time
+  audioBitsPerSecond: 128000
 };
 
 export const AUDIO_CONSTRAINTS = {

@@ -1,63 +1,122 @@
 import os
-import tempfile
 import ffmpeg
+import tempfile
+import shutil
 from fastapi import APIRouter, WebSocket
 from app.services.whisper_service import transcribe_audio
-from app.services.diarization_service import diarize_audio
-from app.utils.audio_utils import merge_transcript_and_speakers
 
 router = APIRouter()
 
-def convert_to_wav(input_bytes: bytes, sample_rate: int = 16000) -> str:
-    """Convert raw or compressed audio bytes to proper WAV (16kHz mono)."""
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav") as tmp_out:
-        try:
-            process = (
-                ffmpeg
-                .input('pipe:0')
-                .output(tmp_out.name, format='wav', acodec='pcm_s16le', ac=1, ar=str(sample_rate))
-                .run(input=input_bytes, capture_stdout=True, capture_stderr=True)
+AUDIO_DEBUG_DIR = os.path.join(os.getcwd(), "audio_debug")
+os.makedirs(AUDIO_DEBUG_DIR, exist_ok=True)
+LIVE_WEBM_PATH = os.path.join(AUDIO_DEBUG_DIR, "live_audio_stream.webm")
+
+
+def convert_webm_to_wav_safe(input_path: str, sample_rate: int = 16000) -> str:
+    """Safely convert cumulative WebM → WAV by snapshotting the file."""
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".webm", dir=AUDIO_DEBUG_DIR) as tmp_copy:
+        snapshot_path = tmp_copy.name
+        shutil.copy(input_path, snapshot_path)
+
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".wav", dir=AUDIO_DEBUG_DIR) as tmp_wav:
+        wav_path = tmp_wav.name
+
+    try:
+        (
+            ffmpeg
+            .input(snapshot_path, format="webm")
+            .output(
+                wav_path,
+                format="wav",
+                acodec="pcm_s16le",
+                ac=1,
+                ar=str(sample_rate)
             )
-            return tmp_out.name
-        except ffmpeg.Error as e:
-            print("❌ FFmpeg conversion error:", e.stderr.decode())
-            os.remove(tmp_out.name)
-            raise
+            .overwrite_output()
+            .run(capture_stdout=True, capture_stderr=True)
+        )
+        print(f"✅ Converted WebM → WAV: {wav_path}")
+        os.remove(snapshot_path)
+        return wav_path
+    except ffmpeg.Error as e:
+        print("❌ FFmpeg failed:", e.stderr.decode(errors="ignore"))
+        if os.path.exists(snapshot_path):
+            os.remove(snapshot_path)
+        raise RuntimeError("WebM → WAV conversion failed")
+
 
 @router.websocket("/ws/audio")
 async def websocket_endpoint(websocket: WebSocket):
+    """
+    Real-time captioning WebSocket.
+    Keeps appending to one .webm file and sends only *new* speech from Whisper.
+    """
     await websocket.accept()
-    buffer = bytearray()
+    print("🎧 Live caption WebSocket connected.")
 
-    print("🎧 WebSocket client connected.")
+    if os.path.exists(LIVE_WEBM_PATH):
+        os.remove(LIVE_WEBM_PATH)
+
+    chunk_count = 0
+    buffer_bytes = 0
+    last_text = ""
 
     try:
         while True:
             data = await websocket.receive_bytes()
-            print("📦 Received chunk size:", len(data))
-            buffer.extend(data)
+            chunk_count += 1
 
-            # Process every ~5 seconds of audio (16kHz * 5s * 2 bytes)
-            if len(buffer) >= 16000 * 5 * 2:
+            # Append chunk
+            with open(LIVE_WEBM_PATH, "ab") as f:
+                f.write(data)
+
+            buffer_bytes += len(data)
+            print(f"📦 Received chunk #{chunk_count}: {len(data)} bytes (total file={os.path.getsize(LIVE_WEBM_PATH)})")
+
+            # Process every ~130 KB accumulated
+            if buffer_bytes >= 130_000:
                 try:
-                    # Convert received audio to valid WAV
-                    wav_path = convert_to_wav(buffer)
+                    wav_path = convert_webm_to_wav_safe(LIVE_WEBM_PATH)
 
-                    print(f"✅ Saved and converted WAV: {wav_path}")
+                    print("🎙️ Running Whisper transcription...")
+                    segments = transcribe_audio(wav_path)
 
-                    # Run transcription + diarization
-                    transcript = transcribe_audio(wav_path)
-                    diarization = diarize_audio(wav_path)
-                    combined = merge_transcript_and_speakers(transcript, diarization)
+                    if not segments:
+                        print("⚠️ No speech detected.")
+                        buffer_bytes = 0
+                        continue
 
-                    await websocket.send_json(combined)
-                    buffer.clear()
+                    current_text = " ".join(seg["text"].strip() for seg in segments if seg["text"].strip())
+
+                    if len(current_text) > len(last_text):
+                        delta = current_text[len(last_text):].strip()
+                        if delta:
+                            print(f"🆕 Live caption update: '{delta}'")
+                            await websocket.send_json({
+                                "type": "caption_update",
+                                "text": delta
+                            })
+                            last_text = current_text
+                        else:
+                            print("⚠️ Whisper returned same text, skipping.")
+                    else:
+                        print("⚠️ No new text detected yet.")
+
+                    buffer_bytes = 0
                     os.remove(wav_path)
+
+                    # Reset stream every ~2 MB
+                    if os.path.getsize(LIVE_WEBM_PATH) > 2_000_000:
+                        os.remove(LIVE_WEBM_PATH)
+                        print("♻️ Resetting stream file for fresh capture.")
+
                 except Exception as e:
-                    print(f"❌ Error during audio processing: {e}")
+                    print(f"⚠️ Live transcription failed: {e}")
                     await websocket.send_json({"error": str(e)})
+                    buffer_bytes = 0
+
     except Exception as e:
-        print(f"❌ WebSocket connection error: {e}")
+        print(f"❌ WebSocket error: {e}")
         await websocket.close()
     finally:
-        print("🔌 WebSocket client disconnected.")
+        print("🔌 WebSocket disconnected.")
