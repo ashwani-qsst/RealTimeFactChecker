@@ -257,3 +257,10 @@
 .info-box strong {
   color: white;
 }
+
+.caption_text{
+  border: 1px solid red;
+    padding: 5px;
+    border-radius: 8px;
+    margin: 5px 0;
+}
