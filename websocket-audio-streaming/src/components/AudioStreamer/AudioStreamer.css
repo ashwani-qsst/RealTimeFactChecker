@@ -258,9 +258,38 @@
   color: white;
 }
 
-.caption_text{
-  border: 1px solid red;
-    padding: 5px;
-    border-radius: 8px;
-    margin: 5px 0;
+.caption-box {
+  margin-top: 20px;
+  background: #0d1117;
+  border-radius: 10px;
+  padding: 15px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.4);
+}
+
+.caption-header {
+  display: flex;
+  align-items: center;
+  color: #58a6ff;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.caption-text {
+  font-family: "Inter", sans-serif;
+  font-size: 1rem;
+  color: #e6f1ff;
+  max-height: 160px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  transition: all 0.2s ease-in-out;
+}
+
+.caption-line {
+  margin: 4px 0;
+}
+
+.placeholder {
+  color: #7d8590;
+  font-style: italic;
 }
